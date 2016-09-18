@@ -36,6 +36,8 @@ def main():
     compare_image = None
     compare_status = True
 
+    output_dirs = []
+
     try:
         # 画像処理
         for root, dirs, files in os.walk(input_dir):
@@ -63,7 +65,9 @@ def main():
                         if output_public_base_dir is not None:
                             """ モザイクを施し公開用ディレクトリに保存 """
                             photo.mosaic()
-                            output_public_file = os.path.join(_make_directory(output_public_base_dir, date), file)
+                            output_directory = _make_directory(output_public_base_dir, date)
+                            output_public_file = os.path.join(output_directory, file)
+                            if not output_directory in output_dirs : output_dirs += [output_directory]
                             photo.save(output_public_file)
                             print('OK(Public dir save): ' + output_public_file)
                         # 類似判定用画像取得
@@ -91,18 +95,20 @@ def main():
         print(' args:' + str(e.args))
         print(' exception:' + str(e))
 
-def thumbnail():
+    finally:
+        return output_dirs
+
+def thumbnail(input_directory):
     # 設定
     config = configparser.ConfigParser()
     config.read('config.ini')
     reduced_size = config['thumbnail']['reduced_size']
     number_horizontal = config['thumbnail']['number_horizontal']
-    debug = config['setting']['debug']
-    input_dir = config['setting']['input_dir']
-    blank_image = config['setting']['blank_image']
+    blank_image = config['thumbnail']['blank_image']
     try:
         # 画像処理
-        for root, dirs, files in os.walk(input_dir):
+        for directory in input_directory:
+            files = os.listdir(directory)
             result = None
             photos_buff = None
             horizon_photos = []
@@ -111,14 +117,10 @@ def thumbnail():
                 if file.endswith(".jpg"):
                     photo_cnt += 1
                     # 処理対象のファイルを取得
-                    input_file = os.path.join(root, file)
+                    input_file = os.path.join(directory, file)
                     # 写真整理の生成
                     photo = Photo(input_file)
-                    photo.debug(debug)
-                    # 写真の撮影日を取得（保存ディレクトリに使用）
-                    date = photo.shooting_date()
                     # 画像縮小
-                    # resize_photo = photo.resize(reduced_size)
                     photo.resize(reduced_size)
                     # 写真の枠を追加
                     photo.edges()
@@ -150,7 +152,7 @@ def thumbnail():
                         else:
                             # 縦方向の連結
                             result = cv2.vconcat([result, photos_line])
-            cv2.imwrite('thumbnail.png', result)
+                cv2.imwrite(directory + '/thumbnail.png', result)
 
     except Exception as e:
         print('ERROR')

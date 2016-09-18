@@ -4,6 +4,6 @@
 import photo.photos
 
 if __name__ == '__main__':
-    photo.photos.main()
-    photo.photos.thumbnail()
+    output_dirs = photo.photos.main()
+    photo.photos.thumbnail(output_dirs)
     photo.photos.move_files()

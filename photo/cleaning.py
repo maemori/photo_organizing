@@ -147,7 +147,11 @@ class Cleaning(Photo):
                 minSize – 物体が取り得る最小サイズ．これよりも小さい物体は無視されます
             """
             # カスケード分類器で横顔を認識する
-            face = cascade.detectMultiScale(self._gray, scaleFactor=1.03, minNeighbors=5, minSize=(100, 100))
+            factor = float(self._config['detect_multi_scale']['SCALE_FACTOR'])
+            neighbors = int(self._config['detect_multi_scale']['MIN_NEIGHBORS'])
+            min_size_x = int(self._config['detect_multi_scale']['MIN_SIZE_X'])
+            min_size_y = int(self._config['detect_multi_scale']['MIN_SIZE_Y'])
+            face = cascade.detectMultiScale(self._gray, scaleFactor=factor, minNeighbors=neighbors, minSize=(min_size_x, min_size_y))
             # 顔判定
             if 0 < len(face):
                 for (x, y, w, h) in face:

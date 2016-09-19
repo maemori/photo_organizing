@@ -67,7 +67,7 @@ def main():
                             photo.mosaic()
                             output_directory = _make_directory(output_public_base_dir, date)
                             output_public_file = os.path.join(output_directory, file)
-                            if not output_directory in output_dirs : output_dirs += [output_directory]
+                            if not output_directory in output_dirs: output_dirs += [output_directory]
                             photo.save(output_public_file)
                             print('OK(Public dir save): ' + output_public_file)
                         # 類似判定用画像取得
@@ -97,6 +97,7 @@ def main():
 
     finally:
         return output_dirs
+
 
 def thumbnail(input_directory):
     # 設定
@@ -160,6 +161,7 @@ def thumbnail(input_directory):
         print(' args:' + str(e.args))
         print(' exception:' + str(e))
 
+
 def move_files():
     # 設定
     config = configparser.ConfigParser()
@@ -174,10 +176,11 @@ def move_files():
                 # 処理対象のファイルを取得
                 input_file = os.path.join(root, file)
                 # ファイル名から保存先ディレクトリを指定
-                dir_name = file[0:4]+"-"+file[4:6]+"-"+file[6:8]
+                dir_name = file[0:4] + "-" + file[4:6] + "-" + file[6:8]
                 # ファイルの移動
                 output_dir = _make_directory(output_public_base_dir, dir_name)
                 shutil.move(input_file, output_dir)
+
 
 def delete_unneeded_files():
     # 設定
@@ -193,6 +196,7 @@ def delete_unneeded_files():
                 input_file = os.path.join(root, file)
                 os.remove(input_file)
 
+
 def _make_directory(directory, date):
     """
     指定されたディレクトリ配下に日付を付加したディレクトリを返却（存在しない場合は作成）
@@ -206,7 +210,8 @@ def _make_directory(directory, date):
     assert isinstance(output_directory, str)
     return output_directory
 
+
 if __name__ == '__main__':
-    main()
-    thumbnail()
+    output_dirs = main()
+    thumbnail(output_dirs)
     move_files()

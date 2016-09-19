@@ -1,5 +1,3 @@
-/thumbnail.png
 .gitignore
 .idea/
-photo/__pycache__/
 /local/

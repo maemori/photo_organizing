@@ -36,13 +36,13 @@ $ python main.py
 
 ### 4.1.実行したサンプル
 
-とある１日にNarrative Clip 2を首からぶら下げて撮影された写真たちを使用。実効後は撮影日毎に設定された出力先にディレクトリが作成されここの写真とサムネイルが保存されます。
+とある１日にNarrative Clip 2を首からぶら下げて撮影された写真たちを使用。実効後は撮影日毎に設定された出力先にディレクトリが作成されここの写真とサムネイルが保存されます。（約540枚→約200枚）
 
-#### 4.1.1.適用前の状態
+#### 4.1.1.適用前の状態（約540枚）
 
 ![適用前](https://github.com/maemori/photo_organizing/blob/master/test/thumbnail_before.png?raw=true)
 
-#### 4.1.2.適用後の状態
+#### 4.1.2.適用後の状態（約200枚）
 
 ![適用後](https://github.com/maemori/photo_organizing/blob/master/test/thumbnail_after.png?raw=true)
 

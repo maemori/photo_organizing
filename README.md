@@ -12,10 +12,6 @@ Application to organize a large number of photos
 
 当機能はそのノイズを除去しライフログとしての価値を高めることを目的として開発雨を行っております。
 
-### 適用前の状態
-
-### 適用後の状態
-
 ## 1.機能概要
 
 * 類似写真の除去
@@ -38,4 +34,15 @@ Application to organize a large number of photos
 $ python main.py
 ```
 
+### 4.1.実行したサンプル
+
+とある１日にNarrative Clip 2を首からぶら下げて撮影された写真たちを使用。実効後は撮影日毎に設定された出力先にディレクトリが作成されここの写真とサムネイルが保存されます。
+
+#### 4.1.1.適用前の状態
+
+![適用前](https://github.com/maemori/photo_organizing/blob/master/test/thumbnail_before.png?raw=true)
+
+#### 4.1.2.適用後の状態
+
+![適用後](https://github.com/maemori/photo_organizing/blob/master/test/thumbnail_after.png?raw=true)
 

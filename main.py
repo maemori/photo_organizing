@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import photo.photos
+import organizing.photos
 
-output_dirs = photo.photos.main()
-photo.photos.thumbnail(output_dirs)
-photo.photos.move_files()
+output_dirs = organizing.photos.main()
+organizing.photos.thumbnail(output_dirs)
+organizing.photos.move_files()

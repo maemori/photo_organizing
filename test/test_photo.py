@@ -4,26 +4,35 @@ import os
 import sys
 import unittest
 
+import shutil
 from numpy import ndarray
 
 sys.path.append(os.pardir)
-import organizing.photo as photo
-import organizing.exception as exception
-import organizing.util as util
+import organize.photo as photo
+import organize.exception as exception
+import organize.util as util
 
 
 class PhotoTest(unittest.TestCase):
     """Photo test class"""
-    TEST_FILE_DIR = './test_data/resource/input_photo'
-    INPUT_DIR = './input_photo'
-    OUTPUT_DIR = './output_public_photo'
-    TARGET_FILE = './input_photo/20160903_041533_000.jpg'
+    TEST_FILE_DIR = './resource/input_photo/set1'
+    TEST_DIR = './photo'
+    INPUT_DIR = TEST_DIR + os.sep + 'input'
+    OUTPUT_DIR = TEST_DIR + os.sep + 'public'
+    TARGET_FILE = INPUT_DIR + os.sep + '20160903_041533_000.jpg'
+    EXIF_READ_NG_FILE = 'EXIF_NO_DATA.jpg'
 
     # テスト初期化時に実行
     @classmethod
     def setUpClass(cls):
+        try:
+            # テスト用ディレクトリの設置
+            os.makedirs(cls.INPUT_DIR)
+            os.makedirs(cls.OUTPUT_DIR)
+        except OSError:
+            pass
         # テスト用入力ファイルの設置
-        copy_func = util.photo_files(util.copy, cls.TEST_FILE_DIR)
+        copy_func = util.files(util.copy, cls.TEST_FILE_DIR)
         copy_func(cls.INPUT_DIR)
 
     # テスト終了時に実行
@@ -31,12 +40,8 @@ class PhotoTest(unittest.TestCase):
     def tearDownClass(cls):
         # デバッグモード時はテスト結果の画像を削除しない
         if not sys.flags.debug:
-            # テスト用入力ファイルを削除
-            input_file_delete_func = util.photo_files(util.delete, cls.INPUT_DIR)
-            input_file_delete_func()
-            # テスト用出力ファイルを削除
-            output_file_delete_func = util.photo_files(util.delete, cls.OUTPUT_DIR)
-            output_file_delete_func()
+            # テスト用ディレクトリの削除
+            shutil.rmtree(cls.TEST_DIR)
 
     # テストメソッド前処理
     def setUp(self):
@@ -50,7 +55,7 @@ class PhotoTest(unittest.TestCase):
     def test_init_exception(self):
         expected = 'Can not read the image file!'
         try:
-            target = photo.Photo('NOT FILE')
+            photo.Photo('NOT FILE')
         except exception.Photo_read_exception as ex:
             actual = repr(ex)
             self.assertEqual(expected, actual)
@@ -138,6 +143,30 @@ class PhotoTest(unittest.TestCase):
         self.target.debug = 'fALse'
         actual = self.target.debug
         self.assertEqual(expected, actual)
+
+    # EXIF読み込み失敗 撮影日
+    def test_shooting_date_exif_exception(self):
+        expected = 'EXIF data can not be read!'
+        try:
+            target = photo.Photo(self.INPUT_DIR + os.sep + self.EXIF_READ_NG_FILE)
+            target.shooting_date()
+        except exception.Photo_exif_read_exception as ex:
+            actual = repr(ex)
+            self.assertEqual(expected, actual)
+        else:
+            self.assertTrue(False)
+
+    # EXIF読み込み失敗 撮影日時
+    def test_shooting_datetime_exif_exception(self):
+        expected = 'EXIF data can not be read!'
+        try:
+            target = photo.Photo(self.INPUT_DIR + os.sep + self.EXIF_READ_NG_FILE)
+            target.shooting_datetime()
+        except exception.Photo_exif_read_exception as ex:
+            actual = repr(ex)
+            self.assertEqual(expected, actual)
+        else:
+            self.assertTrue(False)
 
 
 if __name__ == '__main__':

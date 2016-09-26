@@ -34,11 +34,13 @@ class Photos:
             # 移動対象ファイルを処理
             processor = util.files(self._move_files_func, self.config.input_dir)
             processor()
-            # 削除対象ファイルを削除
+            # 削除対象ファイルを処理
             processor = util.files(self._delete_unneeded_func, self.config.input_dir)
             processor()
             # サムネイル画像の出力
             self.thumbnail()
+            # 入力ディレクトリの空ディレクトリを削除
+            self._delete_directory()
         except exception.Photo_exception as ex:
             print('ERROR')
             print(' type:' + str(type(ex)))
@@ -177,6 +179,13 @@ class Photos:
             os.remove(target_file)
         except Exception:
             raise exception.Photo_exception
+
+    def _delete_directory(self):
+        """入力ディレクトリの空ディレクトリを削除."""
+        try:
+            os.removedirs(self.config.input_dir)
+        except OSError:
+            pass
 
 
 class Config:

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""共通で利用できる機能."""
+"""写真の整理で共通で利用できる機能."""
 import os
 import shutil
 
@@ -30,4 +30,3 @@ def delete(target_file: str):
     """
     os.remove(target_file)
     return target_file
-

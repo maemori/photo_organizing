@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-写真群処理
-"""
+"""複数の写真をまとめて整理"""
 import cv2
 import configparser
 import os.path
@@ -14,7 +12,7 @@ import organize.exception as exception
 
 
 class Photos:
-    """写真群整理クラス"""
+    """複数の写真をまとめて整理するクラス"""
     def __init__(self):
         # 設定の読み込み
         self.config = Config()
@@ -41,11 +39,8 @@ class Photos:
             self.thumbnail()
             # 入力ディレクトリの空ディレクトリを削除
             self._delete_directory()
-        except exception.Photo_exception as ex:
-            print('ERROR')
-            print(' type:' + str(type(ex)))
-            print(' args:' + str(ex.args))
-            print(' exception:' + str(ex))
+        except exception.Photo_exception:
+            raise exception.Photo_exception
 
     def _organize_func(self, target_file: str):
         try:
@@ -59,32 +54,38 @@ class Photos:
             date = photo.shooting_date()
             # ピンボケ判定
             blurry_status = photo.out_of_focus(self.config.blurry_value)
+            # バックアップの作成
+            if self.config.backup_dir:
+                # バックアップの指定がある場合はそのディレクトリに移動
+                backup_dir = _make_directory(self.config.backup_dir, date)
+                if not os.path.isfile(backup_dir + os.sep + os.path.basename(target_file)):
+                    shutil.move(target_file, backup_dir)
             # 前の写真と類似判定
             if blurry_status and self.compare_image is not None:
                 self.compare_status = photo.compare(self.compare_image, self.config.compare_value)
             # 保存判定
             if blurry_status and self.compare_status:
+                # 整理済みの写真を指定ディレクトリに保存
                 if self.config.output_dir:
-                    # モザイクを施し公開用ディレクトリに保存
-                    photo.mosaic()
+                    if self.config.mosaic:
+                        # モザイクを施し公開用ディレクトリに保存
+                        photo.mosaic()
                     output_directory = _make_directory(self.config.output_dir, date)
                     output_file = os.path.join(output_directory, os.path.basename(target_file))
                     if output_directory not in self.create_directory:
                         self.create_directory += [output_directory]
                     photo.save(output_file)
                     print('OK(Save): ' + output_file)
-                # 類似判定用画像取得
+                # 類似判定用画像を保持
                 self.compare_image = photo.original
             elif self.config.trash_dir:
-                # 破棄用写真の保管
+                # 破棄対象の写真を残す場合は指定のディレクトリに保存
                 trash_file = os.path.join(_make_directory(self.config.trash_dir, date), os.path.basename(target_file))
                 photo.save(trash_file)
                 print('NG(Trash): ' + trash_file)
-            if self.config.backup_dir:
-                # 入力写真をバックアップディレクトリに移動
-                backup_dir = _make_directory(self.config.backup_dir, date)
-                if not os.path.isfile(backup_dir + os.sep + os.path.basename(target_file)):
-                    shutil.move(target_file, backup_dir)
+            else:
+                # 写真の削除
+                os.remove(target_file)
         except exception.Photo_exception:
             raise
 
@@ -203,6 +204,11 @@ class Config:
             self.compare_value = float(config['setting']['compare_value'])
             self.move_files = config["setting"]["move_files"]
             self.delete_files = config["setting"]["delete_files"]
+            # mosaic = config["setting"]["mosaic"].lower()
+            if config["setting"]["mosaic"].lower() == 'true':
+                self.mosaic = True
+            else:
+                self.mosaic = False
             self.thumbnail_reduced_size = config['thumbnail']['reduced_size']
             self.thumbnail_number_horizontal = config['thumbnail']['number_horizontal']
             self.thumbnail_blank_image = config['thumbnail']['blank_image']
@@ -229,5 +235,11 @@ def _make_directory(directory: str, date: str) -> str:
 
 
 if __name__ == '__main__':
-    target = Photos()
-    target.organize()
+    try:
+        target = Photos()
+        target.organize()
+    except exception.Photo_exception as ex:
+        print('ERROR')
+        print(' type:' + str(type(ex)))
+        print(' args:' + str(ex.args))
+        print(' exception:' + str(ex))

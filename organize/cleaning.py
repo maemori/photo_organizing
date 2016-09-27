@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
-""" cleaning
-ライフログとして撮影された大量の写真を整理する役割を持ったクラスです.
-機能は写真のピンボケ判定、連続で作成された写真の類似度を判定.
-また、顔を認識しモザイク化を行います.
-"""
-from organize.photo import Photo
-import organize.exception as exception
-
+"""写真の整理"""
 import os
 import configparser
 import cv2
 from numpy import ndarray
 
+from organize.photo import Photo
+import organize.exception as exception
+
 
 class Cleaning(Photo):
-    """写真の整理を行うクラス."""
+    """写真の整理を行うクラス.
+    ライフログとして撮影された大量の写真を整理する役割を持ったクラスです.
+    機能は写真のピンボケ判定、連続で作成された写真の類似度を判定.
+    また、顔を認識しモザイク化を行います.
+    """
     def __init__(self, filename):
         super().__init__(filename)
         # 設定
         self._config = configparser.ConfigParser()
-        self._config.read("organizing" + os.sep + "config.ini")
+        self._config.read("organize" + os.sep + "config.ini")
         # 初期設置
         self._compare_status = None
         self._blurry_status = None
@@ -104,6 +104,7 @@ class Cleaning(Photo):
         モザイクを適用する。カスケードファイルは[cascade_file]に定義されている全てが適用される
         """
         try:
+            # TODO パフォーマンス改善ポイント
             for key in self._config['cascade_file']:
                 file = self._config['cascade_file'][key]
                 face = self.__cascade(file)

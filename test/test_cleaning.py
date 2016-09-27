@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import filecmp
 import os
 import sys
 import unittest
 import shutil
-
-from numpy import ndarray
 
 sys.path.append(os.pardir)
 import organize.cleaning as photo

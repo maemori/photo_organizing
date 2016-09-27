@@ -126,7 +126,7 @@ class PhotoTest(unittest.TestCase):
     # 画像に付与するデバッグ情報の出力位置
     def test_debug_text_y(self):
         expected = 160
-        actual = self.target.debug_text_y()
+        self.target.debug_text_y()
         actual = self.target.debug_text_y()
         self.assertEqual(expected, actual)
 

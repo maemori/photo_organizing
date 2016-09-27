@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """写真の振る舞いの共通的な機能."""
-import organize.exception as exception
-
 import sys
 import cv2
 import exifread
 import os.path
 import time
 from numpy import ndarray
+
+import organize.exception as exception
 
 
 class Photo:

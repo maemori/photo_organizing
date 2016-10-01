@@ -4,9 +4,11 @@ import os
 import configparser
 import cv2
 from numpy import ndarray
+from collections import namedtuple
 
 from organize.photo import Photo
 import organize.exception as exception
+# import organize.log as log
 
 
 class Cleaning(Photo):
@@ -15,11 +17,18 @@ class Cleaning(Photo):
     機能は写真のピンボケ判定、連続で作成された写真の類似度を判定.
     また、顔を認識しモザイク化を行います.
     """
+    # log = log.logger(__name__)
+    # log.info("Class load")
+
+    _CONFIG = None
+    _CASCADE = None
+
     def __init__(self, filename):
         super().__init__(filename)
+        # self.log.info("Start: " + filename)
         # 設定
-        self._config = configparser.ConfigParser()
-        self._config.read("organize" + os.sep + "config.ini")
+        self._config = Cleaning.config()
+        self._cascade = Cleaning.cascade()
         # 初期設置
         self._compare_status = None
         self._blurry_status = None
@@ -33,6 +42,30 @@ class Cleaning(Photo):
     @property
     def blurry_status(self):
         return self._blurry_status
+
+    @classmethod
+    def config(cls):
+        """設定を取得して保持する
+        """
+        if cls._CONFIG is None:
+            # cls.log.info("Config file read")
+            cls._CONFIG = configparser.ConfigParser()
+            cls._CONFIG.read("organize" + os.sep + "config.ini")
+        return cls._CONFIG
+
+    @classmethod
+    def cascade(cls):
+        """顔探索用のカスケード型分類器を取得し保持する
+        """
+        cascades = ()
+        Cascades_tuple = namedtuple("cascades", "key cascade")
+        if cls._CASCADE is None:
+            # cls.log.info("Cascade files read")
+            for key in cls._CONFIG['cascade_file']:
+                file = cls._CONFIG['cascade_file'][key]
+                cascades += (Cascades_tuple(key, cv2.CascadeClassifier(file)), )
+            cls._CASCADE = cascades
+        return cls._CASCADE
 
     def out_of_focus(self, blurry_value: float) -> bool:
         """ピンボケ判定.
@@ -104,10 +137,8 @@ class Cleaning(Photo):
         モザイクを適用する。カスケードファイルは[cascade_file]に定義されている全てが適用される
         """
         try:
-            # TODO パフォーマンス改善ポイント
-            for key in self._config['cascade_file']:
-                file = self._config['cascade_file'][key]
-                face = self.__cascade(file)
+            for key, cascade in self._cascade:
+                face = self._cascade_func(cascade)
                 if self._debug:
                     color = (238, 110, 64)
                     print("- {}: {:5d}".format(key, face))
@@ -116,18 +147,18 @@ class Cleaning(Photo):
         except KeyError:
             raise exception.Photo_setting_exception
 
-    def __cascade(self, cascade_file: str) -> int:
+    def _cascade_func(self, cascade: cascade) -> int:
         """顔認識.
         カスケードファイルを用いて顔を認識しモザイク処理を施す
 
         Args:
-            cascade_file: 処理対象のカスケードファイル
+            cascade: 処理対象のカスケード
         return:
             顔の検出数
         """
         try:
             # 顔探索用のカスケード型分類器を取得
-            cascade = cv2.CascadeClassifier(cascade_file)
+            # cascade = cv2.CascadeClassifier(cascade_file)
             """
             物体認識（顔認識）の実行
                 image – CV_8U 型の行列．ここに格納されている画像中から物体が検出されます

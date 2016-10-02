@@ -82,7 +82,7 @@ class Photos(Base):
                     if output_directory not in self.create_directory:
                         self.create_directory += [output_directory]
                     photo.save(output_file)
-                    print('OK(Save): ' + output_file)
+                    super().log.info("OK(Save): {File:s}".format(File=output_file))
                 # 類似判定用画像を保持
                 self.compare_image = photo.original
             elif self.config.trash_dir:
@@ -90,7 +90,7 @@ class Photos(Base):
                 trash_file = os.path.join(
                     util.make_directory(self.config.trash_dir, date), os.path.basename(target_file))
                 photo.save(trash_file)
-                print('NG(Trash): ' + trash_file)
+                super().log.info("NG(Trash): {File:s}".format(File=trash_file))
             else:
                 # 写真の削除
                 os.remove(target_file)
@@ -205,12 +205,12 @@ class Config:
     def __init__(self):
         try:
             config = configparser.ConfigParser()
-            config.read('config.ini')
+            config.read(os.path.join('conf', 'config.ini'))
             self.debug = config['setting']['debug']
-            self.input_dir = config['setting']['input_dir']
-            self.output_dir = config['setting']['output_dir']
-            self.backup_dir = config['setting']['backup_dir']
-            self.trash_dir = config['setting']['trash_dir']
+            self.input_dir = os.path.expanduser(config['setting']['input_dir'])
+            self.output_dir = os.path.expanduser(config['setting']['output_dir'])
+            self.backup_dir = os.path.expanduser(config['setting']['backup_dir'])
+            self.trash_dir = os.path.expanduser(config['setting']['trash_dir'])
             self.blurry_value = float(config['setting']['blurry_value'])
             self.compare_value = float(config['setting']['compare_value'])
             self.move_files = config["setting"]["move_files"]
@@ -226,8 +226,3 @@ class Config:
             self.thumbnail_filename = config['thumbnail']['filename']
         except KeyError:
             raise exception.Photo_setting_exception
-
-
-if __name__ == '__main__':
-    target = Photos()
-    target.organize()

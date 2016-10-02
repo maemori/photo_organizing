@@ -17,8 +17,8 @@ class PhotoTest(unittest.TestCase):
     TEST_DIR = './photo'
     INPUT_DIR = TEST_DIR + os.sep + 'input'
     OUTPUT_DIR = TEST_DIR + os.sep + 'public'
-    CASCADE_ORIGINAL_DIR = '../cascade'
-    CASCADE_TEST_DIR = './cascade/'
+    CASCADE_ORIGINAL_DIR = '../resource/cascade'
+    CASCADE_TEST_DIR = './resource/cascade/'
     TARGET_FILE_01 = INPUT_DIR + os.sep + '20160803_105354_000.jpg'
     TARGET_FILE_02 = INPUT_DIR + os.sep + '20160803_105458_000.jpg'
     TARGET_FILE_03 = INPUT_DIR + os.sep + '20160803_110935_000.jpg'
@@ -131,12 +131,13 @@ class PhotoTest(unittest.TestCase):
         expected = 'Fail to recognize the face!'
         try:
             self.target = photo.Cleaning(self.TARGET_FILE_01)
-            cascade_func = util.files(util.delete, self.CASCADE_TEST_DIR)
-            cascade_func()
+            self.target._cascade.clear()
             self.target.mosaic()
         except exception.Photo_cascade_exception as ex:
             actual = repr(ex)
             self.assertEqual(expected, actual)
+        except Exception as ex:
+            test = ex
         else:
             self.assertTrue(False)
 

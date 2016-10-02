@@ -5,3 +5,6 @@
 /test/log/analysis.log
 /test/log/history_of_performance.log
 /test/log/history_of_processing.log
+/log/history_of_performance.log
+/log/history_of_processing.log
+/log/analysis.log

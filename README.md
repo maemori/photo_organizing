@@ -39,9 +39,9 @@ $ python main.py
 
 #### 4.1.1.適用前の状態（約540枚）
 
-![適用前](https://github.com/maemori/photo_organizing/blob/master/test/resource/thumbnail_before.png?raw=true)
+![適用前](https://github.com/maemori/photo_organizing/blob/master/test/resource/image/thumbnail_before.png?raw=true)
 
 #### 4.1.2.適用後の状態（約200枚）
 
-![適用後](https://github.com/maemori/photo_organizing/blob/master/test/resource/thumbnail_after.png?raw=true)
+![適用後](https://github.com/maemori/photo_organizing/blob/master/test/resource/image/thumbnail_after.png?raw=true)
 

@@ -48,9 +48,12 @@ class Cleaning(Photo):
         """設定を取得して保持する
         """
         if cls._CONFIG is None:
-            super().log.info("Config file read")
-            cls._CONFIG = configparser.ConfigParser()
-            cls._CONFIG.read("organize" + os.sep + "config.ini")
+            try:
+                super().log.info("Config file read")
+                cls._CONFIG = configparser.ConfigParser()
+                cls._CONFIG.read(os.path.join("conf", "organize", "config.ini"))
+            except KeyError:
+                raise exception.Photo_setting_exception
         return cls._CONFIG
 
     @classmethod
@@ -58,13 +61,16 @@ class Cleaning(Photo):
         """顔探索用のカスケード型分類器を取得し保持する
         """
         cascades = ()
-        Cascades_tuple = namedtuple("cascades", "key cascade")
         if cls._CASCADE is None:
-            super().log.info("Cascade files read")
-            for key in cls._CONFIG['cascade_file']:
-                file = cls._CONFIG['cascade_file'][key]
-                cascades += (Cascades_tuple(key, cv2.CascadeClassifier(file)), )
-            cls._CASCADE = cascades
+            try:
+                Cascades_tuple = namedtuple("cascades", "key cascade")
+                super().log.info("Cascade files read")
+                for key in cls._CONFIG['cascade_file']:
+                    file = cls._CONFIG['cascade_file'][key]
+                    cascades += (Cascades_tuple(key, cv2.CascadeClassifier(file)), )
+                cls._CASCADE = cascades
+            except KeyError:
+                raise exception.Photo_setting_exception
         return cls._CASCADE
 
     @performance.time_func
@@ -138,8 +144,8 @@ class Cleaning(Photo):
                 self.analysis_log.info(
                     "Filename:{Filename}, Cascade:{Cascade:s}, Face:{Face:d}"
                     .format(Filename=self.filename, Cascade=str(key), Face=face))
-        except KeyError:
-            raise exception.Photo_setting_exception
+        except Exception:
+            raise
 
     @performance.time_func
     def _cascade_func(self, cascade: cascade) -> int:
@@ -188,5 +194,7 @@ class Cleaning(Photo):
                         # 認識部分を四角で囲む
                         cv2.rectangle(self._image, (x, y), (x + w, y + h), (180, 180, 230), 2)
             return len(face)
+        except KeyError:
+            raise exception.Photo_setting_exception
         except Exception:
             raise exception.Photo_cascade_exception

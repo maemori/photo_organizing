@@ -17,8 +17,8 @@ class PhotoTest(unittest.TestCase):
     TEST_DIR = './photo'
     INPUT_DIR = TEST_DIR + os.sep + 'input'
     OUTPUT_DIR = TEST_DIR + os.sep + 'public'
-    CASCADE_ORIGINAL_DIR = '../cascade'
-    CASCADE_TEST_DIR = './cascade'
+    CASCADE_ORIGINAL_DIR = '../resource/cascade'
+    CASCADE_TEST_DIR = './resource/cascade'
     TARGET_FILE_01 = INPUT_DIR + os.sep + '20160803_105354_000.jpg'
     TARGET_FILE_02 = INPUT_DIR + os.sep + '20160803_105458_000.jpg'
     TARGET_FILE_03 = INPUT_DIR + os.sep + '20160803_110935_000.jpg'
@@ -59,7 +59,7 @@ class PhotoTest(unittest.TestCase):
         cascade_func = util.files(util.delete, self.CASCADE_TEST_DIR)
         cascade_func()
 
-    #
+    # メイン処理
     def test_main_process(self):
         self.target.organize()
         self.assertTrue(True)

@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+import shutil
 import sys
 import unittest
-import shutil
 
 sys.path.append(os.pardir)
 from photos import Photos
 # import organize.exception as exception
-import organize.util as util
+import everyone.util as util
 
 
 class PhotoTest(unittest.TestCase):

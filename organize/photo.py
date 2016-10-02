@@ -7,16 +7,20 @@ import os.path
 import time
 from numpy import ndarray
 
+from organize.base import Base
 import organize.exception as exception
 
 
-class Photo:
+class Photo(Base):
     """写真基底クラス."""
 
+    # TODO DELETE
     # デバッグモード時に写真に処理結果を付与するY座標
     DEBUG_TEXT_Y = 80
 
     def __init__(self, filename: str):
+        # 画像ファイル名
+        self._filename = filename
         # 画像読み込み
         self._image = cv2.imread(filename)
         if self._image is None:
@@ -31,6 +35,10 @@ class Photo:
         self._debug = sys.flags.debug
         # Exi read
         self._exif_tags = self._exif_read()
+
+    @property
+    def filename(self) -> str:
+        return self._filename
 
     @property
     def image(self) -> ndarray:
@@ -93,10 +101,6 @@ class Photo:
         """
         width = self._image.shape[1] * (float(size) / 100)
         height = self._image.shape[0] * (float(size) / 100)
-        """
-        resize_image = cv2.resize(self._image, (int(height), int(width)))
-        return resize_image
-        """
         self._image = cv2.resize(self._image, (int(width), int(height)))
 
     def edges(self):
@@ -123,9 +127,12 @@ class Photo:
             times = (time.mktime(create_date), time.mktime(update_date))
             # ファイル作成日、更新日の設定
             os.utime(filename, times)
+            # ファイル名を保存先のファイル名で更新
+            self._filename = filename
         except Exception:
             raise exception.Photo_write_exception()
 
+    # TODO DELETE
     def debug_text_y(self) -> int:
         """画像に付与するデバッグ情報の出力位置の取得.
         デバッグ用のフォントのサイズを変更した場合、設定値(DEBUG_TEXT_Y)の変更が必要.

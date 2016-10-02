@@ -30,3 +30,20 @@ def delete(target_file: str):
     """
     os.remove(target_file)
     return target_file
+
+
+def make_directory(directory: str, date: str) -> str:
+    """指定されたディレクトリ配下に日付ディレクトリを返却（存在しない場合は作成）.
+    作成されるディレクトリ: ./基準ディレウトリ/[YYYY]/[MM]/[YYYY-MM-DD]
+
+    Args:
+        directory: 基準となるディレクトリ.
+        date: 基準となるディレクトリ配下に作成する日付情報.
+    return:
+        ディレクトリパス.
+    """
+    output_directory = directory + os.sep + date[:4] + os.sep + date[5:7] + os.sep + date
+    if not os.path.isdir(output_directory):
+        os.makedirs(output_directory)
+    assert isinstance(output_directory, str)
+    return output_directory

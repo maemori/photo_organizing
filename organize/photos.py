@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
 """複数の写真をまとめて整理"""
-import cv2
 import configparser
 import os.path
 import shutil
 
-from organize.photo import Photo
-from organize.cleaning import Cleaning
-import organize.util as util
+import cv2
+
+from organize.base import Base
 import organize.exception as exception
+from organize.cleaning import Cleaning
+from organize.photo import Photo
+import everyone.util as util
+import everyone.performance as performance
 
 
-class Photos:
+class Photos(Base):
     """複数の写真をまとめて整理するクラス"""
     def __init__(self):
         # 設定の読み込み
+        super().log.info("Config file read")
         self.config = Config()
         # 類似画像比較結果
         self.compare_status = True
@@ -23,6 +27,7 @@ class Photos:
         # 処理結果保存ディレクトリ
         self.create_directory = []
 
+    @performance.time_func
     def organize(self):
         """写真整理メイン処理"""
         try:
@@ -39,9 +44,11 @@ class Photos:
             self.thumbnail()
             # 入力ディレクトリの空ディレクトリを削除
             self._delete_directory()
-        except exception.Photo_exception:
-            raise exception.Photo_exception
+        except exception.Photo_exception as ex:
+            super().log.error('Exception type{Type:s}, Args{Args:s}, Detail{Detail:s}'
+                              .format(Type=str(type(ex)), Args=str(ex.args), Detail=str(ex)))
 
+    @performance.time_func
     def _organize_func(self, target_file: str):
         try:
             if not target_file.endswith(".jpg"):
@@ -57,7 +64,7 @@ class Photos:
             # バックアップの作成
             if self.config.backup_dir:
                 # バックアップの指定がある場合はそのディレクトリに移動
-                backup_dir = _make_directory(self.config.backup_dir, date)
+                backup_dir = util.make_directory(self.config.backup_dir, date)
                 if not os.path.isfile(backup_dir + os.sep + os.path.basename(target_file)):
                     shutil.move(target_file, backup_dir)
             # 前の写真と類似判定
@@ -70,7 +77,7 @@ class Photos:
                     if self.config.mosaic:
                         # モザイクを施し公開用ディレクトリに保存
                         photo.mosaic()
-                    output_directory = _make_directory(self.config.output_dir, date)
+                    output_directory = util.make_directory(self.config.output_dir, date)
                     output_file = os.path.join(output_directory, os.path.basename(target_file))
                     if output_directory not in self.create_directory:
                         self.create_directory += [output_directory]
@@ -80,7 +87,8 @@ class Photos:
                 self.compare_image = photo.original
             elif self.config.trash_dir:
                 # 破棄対象の写真を残す場合は指定のディレクトリに保存
-                trash_file = os.path.join(_make_directory(self.config.trash_dir, date), os.path.basename(target_file))
+                trash_file = os.path.join(
+                    util.make_directory(self.config.trash_dir, date), os.path.basename(target_file))
                 photo.save(trash_file)
                 print('NG(Trash): ' + trash_file)
             else:
@@ -89,6 +97,7 @@ class Photos:
         except exception.Photo_exception:
             raise
 
+    @performance.time_func
     def thumbnail(self):
         """サムネイル画像の作成.
         指定されたディレクトリに存在する写真を集めサムネイル画像を作成する.
@@ -145,6 +154,7 @@ class Photos:
         except Exception:
             raise exception.Photo_thumbnail_exception
 
+    @performance.time_func
     def _move_files_func(self, target_file: str):
         """入力ディレクトリに存在する処理対象外のファイルを出力ディレクトリに移動する.
 
@@ -160,12 +170,13 @@ class Photos:
             target_file_name = os.path.basename(target_file)
             dir_name = target_file_name[0:4] + "-" + target_file_name[4:6] + "-" + target_file_name[6:8]
             # ファイルの移動
-            output_dir = _make_directory(self.config.output_dir, dir_name)
+            output_dir = util.make_directory(self.config.output_dir, dir_name)
             if not os.path.isfile(output_dir + os.sep + target_file_name):
                 shutil.move(target_file, output_dir)
         except Exception:
             raise exception.Photo_exception
 
+    @performance.time_func
     def _delete_unneeded_func(self, target_file: str):
         """入力ディレクトリに存在する除外対象のファイルを削除する.
         Args:
@@ -217,29 +228,6 @@ class Config:
             raise exception.Photo_setting_exception
 
 
-def _make_directory(directory: str, date: str) -> str:
-    """指定されたディレクトリ配下に日付ディレクトリを返却（存在しない場合は作成）.
-    作成されるディレクトリ: ./基準ディレウトリ/[YYYY]/[MM]/[YYYY-MM-DD]
-
-    Args:
-        directory: 基準となるディレクトリ.
-        date: 基準となるディレクトリ配下に作成する日付情報.
-    return:
-        ディレクトリパス.
-    """
-    output_directory = directory + os.sep + date[:4] + os.sep + date[5:7] + os.sep + date
-    if not os.path.isdir(output_directory):
-        os.makedirs(output_directory)
-    assert isinstance(output_directory, str)
-    return output_directory
-
-
 if __name__ == '__main__':
-    try:
-        target = Photos()
-        target.organize()
-    except exception.Photo_exception as ex:
-        print('ERROR')
-        print(' type:' + str(type(ex)))
-        print(' args:' + str(ex.args))
-        print(' exception:' + str(ex))
+    target = Photos()
+    target.organize()

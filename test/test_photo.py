@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+import shutil
 import sys
 import unittest
 
-import shutil
 from numpy import ndarray
 
 sys.path.append(os.pardir)
 import organize.photo as photo
 import organize.exception as exception
-import organize.util as util
+import everyone.util as util
 
 
 class PhotoTest(unittest.TestCase):

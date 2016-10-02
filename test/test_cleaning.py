@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+import shutil
 import sys
 import unittest
-import shutil
 
 sys.path.append(os.pardir)
 import organize.cleaning as photo
 import organize.exception as exception
-import organize.util as util
+import everyone.util as util
 
 
 class PhotoTest(unittest.TestCase):
@@ -127,7 +127,7 @@ class PhotoTest(unittest.TestCase):
             self.assertTrue(False)
 
     # モザイク例外(カスケードファイルなし)
-    def test_mosaic_not__file_exception(self):
+    def test_mosaic_not_file_exception(self):
         expected = 'Fail to recognize the face!'
         try:
             self.target = photo.Cleaning(self.TARGET_FILE_01)

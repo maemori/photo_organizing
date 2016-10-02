@@ -1,0 +1,65 @@
+version: 1
+
+formatters:
+  normal:
+    format: '%(asctime)s - %(levelname)s - %(filename)s#%(funcName)s - %(lineno)d - %(message)s'
+    datefmt: '%Y/%m/%d %H:%M:%S'
+
+  message:
+    format: '%(message)s'
+
+  processing_time:
+    format: '%(asctime)s - %(message)s'
+    datefmt: '%Y/%m/%d %H:%M:%S'
+
+loggers:
+  organize:
+    handlers: [Console_handler, History_of_processing_handler]
+    level: DEBUG
+
+  performance:
+    handlers: [Console_handler, History_of_performance_handler]
+    level: INFO
+
+  analysis:
+    handlers: [Analysis_handler]
+    level: INFO
+
+handlers:
+  History_of_processing_handler:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: DEBUG
+    formatter: normal
+    filename: ./log/history_of_processing.log
+    encoding: utf8
+    when: D
+    interval: 1
+    backupCount: 7
+    delay: True
+
+  History_of_performance_handler:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: DEBUG
+    formatter: processing_time
+    filename: ./log/history_of_performance.log
+    encoding: utf8
+    when: D
+    interval: 1
+    backupCount: 7
+    delay: True
+
+  Analysis_handler:
+    class: logging.FileHandler
+    formatter: message
+    filename: ./log/analysis.log
+    encoding: utf8
+    mode: w
+    delay: True
+
+  Console_handler:
+    class: logging.StreamHandler
+    formatter: normal
+    stream: ext://sys.stdout
+
+  Null_handler:
+    class: logging.NullHandler

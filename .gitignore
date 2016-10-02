@@ -2,3 +2,6 @@
 .idea/
 /local/
 /test/work/
+/test/log/analysis.log
+/test/log/history_of_performance.log
+/test/log/history_of_processing.log

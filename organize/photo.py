@@ -14,10 +14,6 @@ import organize.exception as exception
 class Photo(Base):
     """写真基底クラス."""
 
-    # TODO DELETE
-    # デバッグモード時に写真に処理結果を付与するY座標
-    DEBUG_TEXT_Y = 80
-
     def __init__(self, filename: str):
         # 画像ファイル名
         self._filename = filename
@@ -131,19 +127,6 @@ class Photo(Base):
             self._filename = filename
         except Exception:
             raise exception.Photo_write_exception()
-
-    # TODO DELETE
-    def debug_text_y(self) -> int:
-        """画像に付与するデバッグ情報の出力位置の取得.
-        デバッグ用のフォントのサイズを変更した場合、設定値(DEBUG_TEXT_Y)の変更が必要.
-
-        Args:
-        return:
-            出力するY座量.
-        """
-        ret = self.DEBUG_TEXT_Y
-        self.DEBUG_TEXT_Y += Photo.DEBUG_TEXT_Y
-        return ret
 
     def _exif_read(self) -> dict:
         """EXIFデータの読み込み.

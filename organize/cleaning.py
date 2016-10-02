@@ -90,18 +90,6 @@ class Cleaning(Photo):
         self.analysis_log.info(
             "Filename:{Filename}, Clearly status:{Clearly:s}, Blurry:{Blurry_value:.2f}, Focus:{Focus:.2f}"
             .format(Filename=self.filename, Clearly=str(self._blurry_status), Blurry_value=blurry_value, Focus=focus))
-        # TODO DELETE
-        # Debug
-        if self._debug:
-            if self._blurry_status:
-                text_blurry = "Clearly"
-                color = (238, 110, 64)
-            else:
-                text_blurry = "Blurry"
-                color = (84, 76, 148)
-            print("- {}: {:.2f}".format(text_blurry, focus))
-            cv2.putText(self._image, "{}: {:.2f}".format(text_blurry, focus), (50, self.debug_text_y()),
-                        cv2.FONT_HERSHEY_SIMPLEX, 2.0, color, 3)
         return self._blurry_status
 
     @performance.time_func
@@ -123,7 +111,7 @@ class Cleaning(Photo):
         total = 0
         for i in range(len(this_histogram)):
             total += min(this_histogram[i], compare_histogram[i])
-        difference = float(total) / sum(this_histogram)
+        difference = float(float(total) / sum(this_histogram))
         if difference >= (compare_value / 100):
             # 似ている
             self._compare_status = True
@@ -135,13 +123,6 @@ class Cleaning(Photo):
             "Filename:{Filename}, Compare status:{Compare_status:s}, Compare{Compare:.2f}, Difference:{Difference:.2f}"
             .format(Filename=self.filename, Compare_status=str(self._compare_status), Compare=(compare_value / 100),
                     Difference=difference))
-        # TODO DELETE
-        # Debug
-        if self._debug:
-            color = (238, 110, 64)
-            print("- {}: {:.2f}%".format("Compare: ", float(difference) * 100))
-            cv2.putText(self._image, "{}: {:.2f}%".format("Compare: ", float(difference) * 100),
-                        (50, self.debug_text_y()), cv2.FONT_HERSHEY_SIMPLEX, 2.0, color, 3)
         return self._compare_status
 
     @performance.time_func
@@ -157,12 +138,6 @@ class Cleaning(Photo):
                 self.analysis_log.info(
                     "Filename:{Filename}, Cascade:{Cascade:s}, Face:{Face:d}"
                     .format(Filename=self.filename, Cascade=str(key), Face=face))
-                # TODO DELETE
-                if self._debug:
-                    color = (238, 110, 64)
-                    print("- {}: {:5d}".format(key, face))
-                    cv2.putText(self._image, "{}: {:d}".format(key, face), (50, self.debug_text_y()),
-                                cv2.FONT_HERSHEY_SIMPLEX, 2.0, color, 3)
         except KeyError:
             raise exception.Photo_setting_exception
 

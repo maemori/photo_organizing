@@ -20,11 +20,11 @@ class Photos(Base):
         # 設定の読み込み
         super().log.info("Config file read")
         self.config = Config()
-        # 類似画像比較結果
+        # 類似画像比較結果を保持
         self.compare_status = True
-        # 比較用保持画像
+        # 比較用保持画像を保持
         self.compare_image = None
-        # 処理結果保存ディレクトリ
+        # 処理対象のディレクトリを保持
         self.directory_to_be_processed = []
 
     @performance.time_func
@@ -166,7 +166,7 @@ class Photos(Base):
             # 対象のファイ名及び拡張子を取得
             extension = self.config.move_files.split(",")
             # 空のリストを除外
-            extension = tuple([val for val in extension if val])
+            extension = tuple([val.strip() for val in extension if val])
             # 対象外は処理しない
             if not target_file.endswith(extension):
                 return
@@ -191,7 +191,7 @@ class Photos(Base):
             # 対象のファイ名及び拡張子を取得
             extension = tuple(self.config.delete_files.split(","))
             # 空のリストを除外
-            extension = tuple([val for val in extension if val])
+            extension = tuple([val.strip() for val in extension if val])
             # 対象外は処理しない
             if not target_file.endswith(extension):
                 return

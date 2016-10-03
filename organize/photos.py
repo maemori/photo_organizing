@@ -25,7 +25,7 @@ class Photos(Base):
         # 比較用保持画像
         self.compare_image = None
         # 処理結果保存ディレクトリ
-        self.create_directory = []
+        self.directory_to_be_processed = []
 
     @performance.time_func
     def organize(self):
@@ -79,8 +79,8 @@ class Photos(Base):
                         photo.mosaic()
                     output_directory = util.make_directory(self.config.output_dir, date)
                     output_file = os.path.join(output_directory, os.path.basename(target_file))
-                    if output_directory not in self.create_directory:
-                        self.create_directory += [output_directory]
+                    if output_directory not in self.directory_to_be_processed:
+                        self.directory_to_be_processed += [output_directory]
                     photo.save(output_file)
                     super().log.info("OK(Save): {File:s}".format(File=output_file))
                 # 類似判定用画像を保持
@@ -104,7 +104,7 @@ class Photos(Base):
         """
         try:
             # 画像処理
-            for directory in self.create_directory:
+            for directory in self.directory_to_be_processed:
                 files = os.listdir(directory)
                 result = None
                 photos_buff = None
@@ -163,7 +163,11 @@ class Photos(Base):
         return:
         """
         try:
-            extension = tuple(self.config.move_files.split(","))
+            # 対象のファイ名及び拡張子を取得
+            extension = self.config.move_files.split(",")
+            # 空のリストを除外
+            extension = tuple([val for val in extension if val])
+            # 対象外は処理しない
             if not target_file.endswith(extension):
                 return
             # ファイル名から保存先ディレクトリを指定
@@ -184,7 +188,11 @@ class Photos(Base):
         return:
         """
         try:
+            # 対象のファイ名及び拡張子を取得
             extension = tuple(self.config.delete_files.split(","))
+            # 空のリストを除外
+            extension = tuple([val for val in extension if val])
+            # 対象外は処理しない
             if not target_file.endswith(extension):
                 return
             # ファイルの削除

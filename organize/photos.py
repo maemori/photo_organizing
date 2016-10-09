@@ -43,13 +43,14 @@ class Photos(Base):
             # サムネイル画像の出力
             self.thumbnail()
             # 入力ディレクトリの空ディレクトリを削除
-            self._delete_directory()
+            util.delete_directory(self.config.input_dir)
         except exception.Photo_exception as ex:
-            super().log.error('Exception type{Type:s}, Args{Args:s}, Detail{Detail:s}'
+            super().log.error("Exception type{Type:s}, Args{Args:s}, Detail{Detail:s}"
                               .format(Type=str(type(ex)), Args=str(ex.args), Detail=str(ex)))
 
     @performance.time_func
     def _organize_func(self, target_file: str):
+        """写真整理処理."""
         try:
             if not target_file.endswith(".jpg"):
                 return
@@ -200,37 +201,29 @@ class Photos(Base):
         except Exception:
             raise exception.Photo_exception
 
-    def _delete_directory(self):
-        """入力ディレクトリの空ディレクトリを削除."""
-        try:
-            os.removedirs(self.config.input_dir)
-        except OSError:
-            pass
-
 
 class Config:
     """設定クラス"""
     def __init__(self):
         try:
             config = configparser.ConfigParser()
-            config.read(os.path.join('conf', 'config.ini'))
-            self.debug = config['setting']['debug']
-            self.input_dir = os.path.expanduser(config['setting']['input_dir'])
-            self.output_dir = os.path.expanduser(config['setting']['output_dir'])
-            self.backup_dir = os.path.expanduser(config['setting']['backup_dir'])
-            self.trash_dir = os.path.expanduser(config['setting']['trash_dir'])
-            self.blurry_value = float(config['setting']['blurry_value'])
-            self.compare_value = float(config['setting']['compare_value'])
+            config.read(os.path.join("conf", "config.ini"))
+            self.debug = config["setting"]["debug"]
+            self.input_dir = os.path.expanduser(config["setting"]["input_dir"])
+            self.output_dir = os.path.expanduser(config["setting"]["output_dir"])
+            self.backup_dir = os.path.expanduser(config["setting"]["backup_dir"])
+            self.trash_dir = os.path.expanduser(config["setting"]["trash_dir"])
+            self.blurry_value = float(config["setting"]["blurry_value"])
+            self.compare_value = float(config["setting"]["compare_value"])
             self.move_files = config["setting"]["move_files"]
             self.delete_files = config["setting"]["delete_files"]
-            # mosaic = config["setting"]["mosaic"].lower()
-            if config["setting"]["mosaic"].lower() == 'true':
+            if config["setting"]["mosaic"].lower() == "true":
                 self.mosaic = True
             else:
                 self.mosaic = False
-            self.thumbnail_reduced_size = config['thumbnail']['reduced_size']
-            self.thumbnail_number_horizontal = config['thumbnail']['number_horizontal']
-            self.thumbnail_blank_image = config['thumbnail']['blank_image']
-            self.thumbnail_filename = config['thumbnail']['filename']
+            self.thumbnail_reduced_size = float(config["thumbnail"]["reduced_size"])
+            self.thumbnail_number_horizontal = int(config["thumbnail"]["number_horizontal"])
+            self.thumbnail_blank_image = config["thumbnail"]["blank_image"]
+            self.thumbnail_filename = config["thumbnail"]["filename"]
         except KeyError:
             raise exception.Photo_setting_exception

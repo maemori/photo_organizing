@@ -4,7 +4,6 @@ import os
 import configparser
 import cv2
 from numpy import ndarray
-from collections import namedtuple
 
 from organize.photo import Photo
 import organize.exception as exception
@@ -16,19 +15,19 @@ class Cleaning(Photo):
     """写真の整理を行うクラス.
     ライフログとして撮影された大量の写真を整理する役割を持ったクラスです.
     機能は写真のピンボケ判定、連続で作成された写真の類似度を判定.
-   、顔を認識しモザイク化を行います.
+    顔を認識しモザイク化を行います.
     """
     # 写真分析結果出力用ログ
     analysis_log = log.logger("analysis")
 
-    _CONFIG = None
-    _CASCADE = None
+    _CONFIG = {}
+    _CASCADE = {}
 
     def __init__(self, filename):
         super().__init__(filename)
-        # 設定
-        self._config = Cleaning.config()
-        self._cascade = Cleaning.cascade()
+        # 設定の読み込み（シンングルトン）
+        Cleaning.config()
+        Cleaning.cascade()
         # 初期設置
         self._compare_status = None
         self._blurry_status = None
@@ -47,31 +46,32 @@ class Cleaning(Photo):
     def config(cls):
         """設定を取得して保持する
         """
-        if cls._CONFIG is None:
+        if not cls._CONFIG:
             try:
                 super().log.info("Config file read")
-                cls._CONFIG = configparser.ConfigParser()
-                cls._CONFIG.read(os.path.join("conf", "organize", "config.ini"))
-            except KeyError:
+                config = configparser.ConfigParser()
+                config.read(os.path.join("conf", "organize", "config.ini"))
+                # カスケード分類器の設定
+                cls._CONFIG["factor"] = float(config["detect_multi_scale"]["SCALE_FACTOR"])
+                cls._CONFIG["neighbors"] = int(config["detect_multi_scale"]["MIN_NEIGHBORS"])
+                cls._CONFIG["min_size_x"] = int(config["detect_multi_scale"]["MIN_SIZE_X"])
+                cls._CONFIG["min_size_y"] = int(config["detect_multi_scale"]["MIN_SIZE_Y"])
+                cls._CONFIG["cascade_file"] = config["cascade_file"]
+            except (KeyError, ValueError):
                 raise exception.Photo_setting_exception
-        return cls._CONFIG
 
     @classmethod
     def cascade(cls):
         """顔探索用のカスケード型分類器を取得し保持する
         """
-        cascades = ()
-        if cls._CASCADE is None:
+        if not cls._CASCADE:
             try:
-                Cascades_tuple = namedtuple("cascades", "key cascade")
                 super().log.info("Cascade files read")
-                for key in cls._CONFIG['cascade_file']:
-                    file = cls._CONFIG['cascade_file'][key]
-                    cascades += (Cascades_tuple(key, cv2.CascadeClassifier(file)), )
-                cls._CASCADE = cascades
+                for key in cls._CONFIG["cascade_file"]:
+                    file = cls._CONFIG["cascade_file"][key]
+                    cls._CASCADE[key] = cv2.CascadeClassifier(file)
             except KeyError:
                 raise exception.Photo_setting_exception
-        return cls._CASCADE
 
     @performance.time_func
     def out_of_focus(self, blurry_value: float) -> bool:
@@ -138,8 +138,8 @@ class Cleaning(Photo):
         モザイクを適用する。カスケードファイルは[cascade_file]に定義されている全てが適用される
         """
         try:
-            for key, cascade in self._cascade:
-                face = self._cascade_func(cascade)
+            for key in self._CASCADE.keys():
+                face = self._cascade_func(self._CASCADE[key])
                 # 分析用ログ出力
                 self.analysis_log.info(
                     "Filename:{Filename}, Cascade:{Cascade:s}, Face:{Face:d}"
@@ -166,16 +166,11 @@ class Cleaning(Photo):
                 minNeighbors – 物体候補となる矩形は，最低でもこの数だけの近傍矩形を含む必要があります
                 minSize – 物体が取り得る最小サイズ．これよりも小さい物体は無視されます
             """
-            # カスケード分類器の設定
-            factor = float(self._config['detect_multi_scale']['SCALE_FACTOR'])
-            neighbors = int(self._config['detect_multi_scale']['MIN_NEIGHBORS'])
-            min_size_x = int(self._config['detect_multi_scale']['MIN_SIZE_X'])
-            min_size_y = int(self._config['detect_multi_scale']['MIN_SIZE_Y'])
             face = cascade.detectMultiScale(
                 self._gray,
-                scaleFactor=factor,
-                minNeighbors=neighbors,
-                minSize=(min_size_x, min_size_y)
+                scaleFactor=self._CONFIG["factor"],
+                minNeighbors=self._CONFIG["neighbors"],
+                minSize=(self._CONFIG["min_size_x"], self._CONFIG["min_size_y"])
             )
             # 顔判定
             if 0 < len(face):

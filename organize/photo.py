@@ -50,7 +50,7 @@ class Photo(Base):
 
     @debug.setter
     def debug(self, value: str):
-        if value.lower() == 'true':
+        if value.lower() == "true":
             self._debug = True
         else:
             self._debug = False
@@ -64,9 +64,9 @@ class Photo(Base):
             撮影日 YYYY-MM-DD.
         """
         try:
-            datetime = '%s' % self._exif_tags['EXIF DateTimeOriginal']
+            datetime = "%s" % self._exif_tags["EXIF DateTimeOriginal"]
             array = datetime.split(" ")
-            date = array[0].replace(':', '-')
+            date = array[0].replace(":", "-")
             return date
         except KeyError:
             raise exception.Photo_exif_read_exception
@@ -80,9 +80,9 @@ class Photo(Base):
             撮影日時 YYYY/MM/DD HH:NN:SS.
         """
         try:
-            datetime = '%s' % self._exif_tags['EXIF DateTimeOriginal']
+            datetime = "%s" % self._exif_tags["EXIF DateTimeOriginal"]
             array = datetime.split(" ")
-            datetime = array[0].replace(':', '/') + " " + array[1]
+            datetime = array[0].replace(":", "/") + " " + array[1]
             return datetime
         except KeyError:
             raise exception.Photo_exif_read_exception
@@ -118,8 +118,8 @@ class Photo(Base):
             # イメージをファイルに保存
             cv2.imwrite(filename, self._image)
             # テキストボックスの中身をdatetimeに直す
-            create_date = time.strptime(self.shooting_datetime(), '%Y/%m/%d %H:%M:%S')
-            update_date = time.strptime(self.shooting_datetime(), '%Y/%m/%d %H:%M:%S')
+            create_date = time.strptime(self.shooting_datetime(), "%Y/%m/%d %H:%M:%S")
+            update_date = time.strptime(self.shooting_datetime(), "%Y/%m/%d %H:%M:%S")
             times = (time.mktime(create_date), time.mktime(update_date))
             # ファイル作成日、更新日の設定
             os.utime(filename, times)
@@ -136,5 +136,5 @@ class Photo(Base):
         return:
             EXIFデータ.
         """
-        with open(self._filename, 'rb') as f:
+        with open(self._filename, "rb") as f:
             return exifread.process_file(f)

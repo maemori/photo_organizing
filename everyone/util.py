@@ -12,22 +12,27 @@ def files(func, target_dir: object):
         for root, dirs, fileset in os.walk(target_dir):
             for file in fileset:
                 target_file = os.path.join(root, file)
-                result += [func(target_file, *args, **kwargs)]
+                result.append(func(target_file, *args, **kwargs))
         return result
 
     return target_function
 
 
-def copy(target_file: str, output_dir: str):
+def copy(target_file: str, output_dir: str) -> str:
     """ファイルのコピー.
     """
+    # ディレクトリが存在しない場合は作成
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+    # コピー
     shutil.copy(target_file, output_dir)
     return target_file
 
 
-def delete(target_file: str):
+def delete(target_file: str) -> str:
     """ファイルの削除.
     """
+    # 削除
     os.remove(target_file)
     return target_file
 
@@ -47,3 +52,19 @@ def make_directory(directory: str, date: str) -> str:
         os.makedirs(output_directory)
     assert isinstance(output_directory, str)
     return output_directory
+
+
+def delete_directory(target_dir: str):
+    """指定ディレクトリ配下の空ディレクトリを削除."""
+    delete_dir_pass = []
+    try:
+        for root, dirs, fileset in os.walk(target_dir):
+            for dir_name in dirs:
+                dir_pass = os.path.join(root, dir_name)
+                if os.path.isdir(dir_pass):
+                    delete_dir_pass.append(dir_pass)
+        delete_dir_pass.reverse()
+        for test in delete_dir_pass:
+            os.removedirs(test)
+    except OSError:
+        pass

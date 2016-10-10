@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""写真の整理"""
+"""写真の整理."""
 import os
 import configparser
 import cv2
@@ -44,7 +44,7 @@ class Cleaning(Photo):
 
     @classmethod
     def config(cls):
-        """設定を取得して保持する
+        """設定を取得して保持する.
         """
         if not cls._CONFIG:
             try:
@@ -62,7 +62,7 @@ class Cleaning(Photo):
 
     @classmethod
     def cascade(cls):
-        """顔探索用のカスケード型分類器を取得し保持する
+        """顔探索用のカスケード型分類器を取得し保持する.
         """
         if not cls._CASCADE:
             try:

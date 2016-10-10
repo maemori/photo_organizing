@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-"""例外定義"""
+"""例外定義."""
 
 
 class Photo_exception(Exception):
     """例外基底クラス."""
-    pass
+    def __repr__(self):
+        return "Photo organizing exception!"
 
 
 class Photo_read_exception(Photo_exception):

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from organize.photos import Photos
+from organize.main import main
 
-target = Photos()
-target.organize()
+if __name__ == "__main__":
+    """メイン処理の実行"""
+    main()

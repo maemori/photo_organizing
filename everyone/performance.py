@@ -6,7 +6,7 @@ import everyone.log as log
 
 
 def time_func(func):
-    """処理時間計測を自動化するデコレータ"""
+    """処理時間計測を自動化するデコレータ."""
     performance_log = log.logger("performance")
 
     def measure_time(*args, **kwargs):

@@ -5,8 +5,7 @@ import shutil
 
 
 def files(func, target_dir: object):
-    """指定されたディレクトリ配下にある画像を処理するレコレーター.
-    """
+    """指定されたディレクトリ配下にある画像を処理するレコレーター."""
     def target_function(*args: tuple, **kwargs: dict):
         result = []
         for root, dirs, fileset in os.walk(target_dir):
@@ -19,8 +18,7 @@ def files(func, target_dir: object):
 
 
 def copy(target_file: str, output_dir: str) -> str:
-    """ファイルのコピー.
-    """
+    """ファイルのコピー."""
     # ディレクトリが存在しない場合は作成
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -30,8 +28,7 @@ def copy(target_file: str, output_dir: str) -> str:
 
 
 def delete(target_file: str) -> str:
-    """ファイルの削除.
-    """
+    """ファイルの削除."""
     # 削除
     os.remove(target_file)
     return target_file

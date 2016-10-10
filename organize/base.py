@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""基底クラス"""
+"""基底クラス."""
 import everyone.log as log
 
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""複数の写真をまとめて整理"""
+"""複数の写真をまとめて整理."""
 import configparser
 import os.path
 import shutil
@@ -7,29 +7,34 @@ import shutil
 import cv2
 
 from organize.base import Base
-import organize.exception as exception
-from organize.cleaning import Cleaning
 from organize.photo import Photo
+from organize.cleaning import Cleaning
+import organize.exception as exception
 import everyone.util as util
 import everyone.performance as performance
 
 
 class Photos(Base):
-    """複数の写真をまとめて整理するクラス"""
+    """複数の写真をまとめて整理するクラス."""
     def __init__(self):
-        # 設定の読み込み
-        super().log.info("Config file read")
-        self.config = Config()
-        # 類似画像比較結果を保持
-        self.compare_status = True
-        # 比較用保持画像を保持
-        self.compare_image = None
-        # 処理対象のディレクトリを保持
-        self.directory_to_be_processed = []
+        try:
+            # 設定の読み込み
+            super().log.info("Config file read")
+            self.config = Config()
+            # 類似画像比較結果を保持
+            self.compare_status = True
+            # 比較用保持画像を保持ß
+            self.compare_image = None
+            # 処理対象のディレクトリを保持
+            self.directory_to_be_processed = []
+        except exception.Photo_exception as ex:
+            super().log.error("Exception type{Type:s}, Args{Args:s}, Detail{Detail:s}"
+                              .format(Type=str(type(ex)), Args=str(ex.args), Detail=str(ex)))
+            raise ex
 
     @performance.time_func
     def organize(self):
-        """写真整理メイン処理"""
+        """写真整理メイン処理."""
         try:
             # 写真の整理を行うメイン処理
             processor = util.files(self._organize_func, self.config.input_dir)
@@ -47,6 +52,7 @@ class Photos(Base):
         except exception.Photo_exception as ex:
             super().log.error("Exception type{Type:s}, Args{Args:s}, Detail{Detail:s}"
                               .format(Type=str(type(ex)), Args=str(ex.args), Detail=str(ex)))
+            raise ex
 
     @performance.time_func
     def _organize_func(self, target_file: str):
@@ -92,7 +98,7 @@ class Photos(Base):
                     util.make_directory(self.config.trash_dir, date), os.path.basename(target_file))
                 photo.save(trash_file)
                 super().log.info("NG(Trash): {File:s}".format(File=trash_file))
-            else:
+            elif not self.config.backup_dir:
                 # 写真の削除
                 os.remove(target_file)
         except exception.Photo_exception:
@@ -203,7 +209,7 @@ class Photos(Base):
 
 
 class Config:
-    """設定クラス"""
+    """設定クラス."""
     def __init__(self):
         try:
             config = configparser.ConfigParser()

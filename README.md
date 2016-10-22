@@ -21,7 +21,7 @@ Application to organize a large number of photos
 ## 2.動作環境
 
 * Python 3.5
-* OpenCV 2.4
+* OpenCV 3.1
 
 ## 3.設定
 
